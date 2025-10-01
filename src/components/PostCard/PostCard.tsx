@@ -274,27 +274,23 @@ export default function PostCard({ post }: PostCardProps) {
                         )}
                     </div>
 
-                    {/* 💥💥 Footer - Comment Input (Fixed to bottom of Modal) - مُعدَّل ليناسب الصورة 💥💥 */}
                     <div
                         className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-20" // padding أقل قليلاً
                     >
-                        <form onSubmit={formik.handleSubmit} className="flex items-start gap-2"> {/* items-start بدلاً من items-end */}
-                            {/* Avatar مع أيقونة الـ Dropdown */}
+                        <form onSubmit={formik.handleSubmit} className="flex items-start gap-2"> 
                             <div className="flex flex-col items-center rounded-full overflow-hidden">
                                 <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
                             </div>
 
-                            {/* حاوية حقل الإدخال والأيقونات وزر الإرسال */}
                             <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative"> {/* Rounded-lg و Shadow */}
-                                {/* حقل الإدخال الرئيسي */}
                                 <InputBase
-                                    placeholder={`Comment as Mostafa`} // نص Placeholder مخصص
+                                    placeholder={`Comment as ${myAccount.name}`} 
                                     fullWidth
                                     multiline
                                     maxRows={4}
                                     name="content"
                                     onChange={formik.handleChange}
-                                    className="text-sm text-gray-800 pr-10" // مسافة لزر الإرسال
+                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10" // مسافة لزر الإرسال
 
                                 />
 

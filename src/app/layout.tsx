@@ -6,7 +6,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/theme";
 import ReduxProvider from "@/components/ReduxProvider/ReduxProvider";
-
+import {Toaster} from "react-hot-toast"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -36,6 +36,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <ReduxProvider>
             {children}
+            <Toaster />
             </ReduxProvider>
           
           </ThemeProvider>

@@ -5,6 +5,10 @@ import { useCallback, useMemo } from "react"
 import { signUp } from "@/actions/signup.action"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import toast from "react-hot-toast"
+import { Button, TextField } from "@mui/material"
+export type PasswordValue = string | undefined;
+
 
 export type SignupFormValues = {
     name: string
@@ -40,10 +44,42 @@ export default function FormSignup() {
             firstName: Yup.string().required("First name is required"),
             surname: Yup.string().required("Surname is required"),
             email: Yup.string().email("Invalid email").required("Email is required"),
-            password: Yup.string().min(6, "At least 6 characters").required("Password is required"),
+            password: Yup.string()
+                .min(8, "Password must be at least 8 characters long")
+                .required("Password is required")
+
+                // 1. حرف كبير واحد على الأقل
+                .test(
+                    'hasUpperCase',
+                    'Must contain at least one uppercase letter',
+                    // 🚨 تحديد نوع val بشكل صريح
+                    (val: PasswordValue) => {
+                        if (!val) return false;
+                        return /[A-Z]/.test(val);
+                    }
+                )
+                // 2. حرف صغير واحد على الأقل
+                .test(
+                    'hasLowerCase',
+                    'Must contain at least one lowercase letter',
+                    (val: PasswordValue) => val ? /[a-z]/.test(val) : false
+                )
+                // 3. رقم واحد على الأقل
+                .test(
+                    'hasNumber',
+                    'Must contain at least one number',
+                    (val: PasswordValue) => val ? /[0-9]/.test(val) : false
+                )
+                // 4. رمز خاص واحد على الأقل
+                .test(
+                    'hasSpecialChar',
+                    'Must contain at least one special character',
+                    (val: PasswordValue) => val ? /[#?!@$%^&*-]/.test(val) : false
+                ),
             rePassword: Yup.string()
                 .oneOf([Yup.ref("password")], "Passwords must match")
-                .required("Please confirm your password"),
+                .required("Please confirm your password")
+            ,
             gender: Yup.string().required("Gender is required"),
             day: Yup.string().required("Day is required"),
             month: Yup.string().required("Month is required"),
@@ -62,13 +98,18 @@ export default function FormSignup() {
                 dateOfBirth: dob,
                 gender: values.gender.toLowerCase(),
             }
-            signUp(finalValues).then((res) => {
+             await signUp(finalValues).then((res) => {
                 if (res.error === 'user already exists.') {
                     formik.setErrors({ email: res.error })
+                } else if (res.message === "success") {
+                    toast.success("Account created", { duration: 1000 })
+                    setTimeout(() => {
+                        router.push("/login")
+                    }, 1000)
+                } else if (res.error) {
+                    toast.error(`${res.error}`, { removeDelay: 1000 })
                 }
-                if(res.message === "success"){
-                    router.push("/login")
-                }
+
             })
 
         },
@@ -109,32 +150,35 @@ export default function FormSignup() {
             <form onSubmit={formik.handleSubmit} className="space-y-4 p-6 border-t-2 border-Lineborder border-dashed">
                 <div className="flex gap-2">
                     <div className="flex-1">
-                        <input
+                        <TextField
                             type="text"
                             name="firstName"
-                            placeholder="First name"
+                            
+                            label="First name"
                             value={formik.values.firstName}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            className={`w-full border rounded-md px-2 py-2 ${formik.touched.firstName && formik.errors.firstName
-                                ? "border-red-500 focus:border-gray-300"
-                                : "border-gray-300"
-                                }`}
+                            className={`w-full`}
+                            error={formik.touched.firstName && formik.errors.firstName ? true : false}
+                            helperText={formik.touched.firstName && formik.errors.firstName ? formik.errors.firstName : ""}
+
                         />
+
                     </div>
                     <div className="flex-1">
-                        <input
+                        <TextField
                             type="text"
                             name="surname"
-                            placeholder="Surname"
+                            label="Surname"
                             value={formik.values.surname}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            className={`w-full border rounded-md px-2 py-2 ${formik.touched.surname && formik.errors.surname
-                                ? "border-red-500 focus:border-gray-300"
-                                : "border-gray-300"
-                                }`}
+                            className={`w-full`}
+                            error={formik.touched.surname && formik.errors.surname ? true : false}
+                            helperText={formik.touched.surname && formik.errors.surname ? formik.errors.surname : ""}
+
                         />
+
                     </div>
                 </div>
 
@@ -221,66 +265,64 @@ export default function FormSignup() {
                     </div>
                 </div>
                 <div>
-                    <input
+                    <TextField
                         type="email"
                         name="email"
-                        placeholder="Email address"
+                        label="Email address"
                         value={formik.values.email}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.email && formik.errors.email
-                            ? "border-red-500 focus:border-gray-300"
-                            : "border-gray-300"
-                            }`}
                         autoComplete="email"
-
+                        className={`w-full`}
+                        error={formik.touched.email && formik.errors.email ? true : false}
+                        helperText={formik.touched.email && formik.errors.email ? formik.errors.email : ""}
                     />
+
                 </div>
 
                 <div>
-                    <input
+                    <TextField
                         type="password"
                         name="password"
-                        placeholder="New password"
+                        label="New password"
                         value={formik.values.password}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.password && formik.errors.password
-                            ? "border-red-500 focus:border-gray-300"
-                            : "border-gray-300"
-                            }`}
                         autoComplete="new-password"
+                        className={`w-full`}
+                        error={formik.touched.password && formik.errors.password ? true : false}
+                        helperText={formik.touched.password && formik.errors.password ? formik.errors.password : ""}
+
                     />
+
                 </div>
 
                 <div>
-                    <input
+                    <TextField
                         type="password"
                         name="rePassword"
-                        placeholder="Confirm password"
+                        label="Confirm password"
                         value={formik.values.rePassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.rePassword && formik.errors.rePassword
-                            ? "border-red-500 focus:border-gray-300 "
-                            : "border-gray-300"
-                            }`}
                         autoComplete="new-password"
+                        className={`w-full`}
+                        error={formik.touched.rePassword && formik.errors.rePassword ? true : false}
+                        helperText={formik.touched.rePassword && formik.errors.rePassword ? formik.errors.rePassword : ""}
+
                     />
+
                 </div>
 
                 <div className="font-sans">
                     <article className="mb-4 *:text-[11px] font-medium *:text-[#777] space-y-3">
-                        <p className="*:text-LinkColor">People who use our service may have uploaded your contact information to Facebook. <Link href={"/"}>Learn more.</Link></p>
+                        <p className="*:text-LinkColor">People who use our service may have uploaded your contact information to SocialAPP. <Link href={"/"}>Learn more.</Link></p>
                         <p className="*:text-LinkColor">By clicking Sign Up, you agree to our <Link href={"/"}>Terms</Link>, <Link href={"/"}>Privacy Policy</Link> and <Link href={"/"}>Cookies Policy</Link>. You may receive SMS notifications from us and can opt out at any time.</p>
                     </article>
-                    <button
-                        type="submit"
-                        disabled={formIsVaild()}
-                        className={`${!formik.isValid || !formik.dirty ? "cursor-not-allowed" : ""} text-center block mx-auto bg-green-600 hover:bg-green-700 text-white font-bold px-15 py-2 rounded-md transition-colors duration-150`}
-                    >
+                    <Button loading={formik.isSubmitting} type="submit" variant="contained" loadingPosition="end" sx={{textAlign:"center",marginInline:"auto",display:"flex",paddingInline:"40px",fontSize:"16px"}} color="success">
                         Sign Up
-                    </button>
+                    </Button>
+                    
                 </div>
                 <Link href={"/login"} className="text-LinkColor text-lg font-medium text-center block">Already have an account?</Link>
             </form>

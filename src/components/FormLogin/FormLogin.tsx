@@ -6,32 +6,64 @@ import { login } from "@/actions/login.action";
 import { useRouter } from "next/navigation";
 import { getDataUser } from "@/store/features/user.slice";
 import { useAppDispatch } from "@/hooks/Redux.hook";
+import toast from "react-hot-toast";
+import { PasswordValue } from "../FormSignup/FormSignup";
+import { Button, TextField } from "@mui/material";
 
 const validationSchema = Yup.object({
     email: Yup.string().email("Invalid email address").required("Email is required"),
-    password: Yup.string()
-        .min(8, "Password must be at least 8 characters")
+    password: Yup.string().min(8, "Password must be at least 8 characters long")
         .required("Password is required")
-        .matches(
-            /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/,
-            "Password must contain at least one uppercase letter, one number, and one special character"
+
+        // 1. حرف كبير واحد على الأقل
+        .test(
+            'hasUpperCase',
+            'Must contain at least one uppercase letter',
+            // 🚨 تحديد نوع val بشكل صريح
+            (val: PasswordValue) => {
+                if (!val) return false;
+                return /[A-Z]/.test(val);
+            }
+        )
+        // 2. حرف صغير واحد على الأقل
+        .test(
+            'hasLowerCase',
+            'Must contain at least one lowercase letter',
+            (val: PasswordValue) => val ? /[a-z]/.test(val) : false
+        )
+        // 3. رقم واحد على الأقل
+        .test(
+            'hasNumber',
+            'Must contain at least one number',
+            (val: PasswordValue) => val ? /[0-9]/.test(val) : false
+        )
+        .test(
+            'hasSpecialChar',
+            'Must contain at least one special character',
+            (val: PasswordValue) => val ? /[#?!@$%^&*-]/.test(val) : false
         ),
 })
 export default function FormLogin() {
-const router = useRouter()
-const dispatch = useAppDispatch()    
-const formik = useFormik({
+    const router = useRouter()
+    const dispatch = useAppDispatch()
+    const formik = useFormik({
         initialValues: {
             email: "",
             password: ""
         },
-        onSubmit: (values) => {
-            login(values).then((res) => {
+        onSubmit: async (values) => {
+            await login(values).then((res) => {
                 if (res === "success") {
+                    toast.success("Login succeeded", { duration: 1000 })
                     dispatch(getDataUser())
-                    router.push("/")
-
-                    
+                    setTimeout(() => {
+                        router.push("/")
+                    }, 1000)
+                } else {
+                    formik.setErrors({
+                        password: `${res.error}`,
+                        email: `${res.error}`
+                    })
                 }
             })
         }
@@ -44,38 +76,38 @@ const formik = useFormik({
             <div>
 
 
-                <input
-                    type="text"
+                <TextField
+                    type="email"
                     name="email"
+                    label="Email address"
                     value={formik.values.email}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    placeholder="Email address or phone number"
-                    className={`w-full border border-solid ${formik.dirty && formik.touched.email && formik.errors.email ? "border-red-500" : "border-gray-300"}  rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#1877f2]/20 focus:border-[#1877f2] font-semibold text-base`}
+                    autoComplete="email"
+                    className={`w-full`}
+                    error={formik.touched.email && formik.errors.email ? true : false}
                 />
-                {
-                    formik.dirty && formik.touched.email && formik.errors.email ? <p className="px-2 font-sans font-medium text-sm text-red-500">{formik.errors.email}</p> : ""
-                }
             </div>
 
             <div>
-                <input
+                <TextField
                     type="password"
                     name="password"
+                    label="New password"
                     value={formik.values.password}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    placeholder="Password"
-                    className={`w-full border border-solid ${formik.dirty && formik.touched.password && formik.errors.password ? "border-red-500" : "border-gray-300"} rounded-md p-3 focus:outline-none focus:ring-2 focus:ring-[#1877f2]/20 focus:border-[#1877f2] font-semibold text-base`}
+                    autoComplete="password"
+                    className={`w-full`}
+                    error={formik.touched.password && formik.errors.password ? true : false}
+                    helperText={formik.touched.password && formik.errors.password ? formik.errors.password : ""}
+
                 />
-                {
-                    formik.dirty && formik.touched.password && formik.errors.password ? <p className="px-2 font-sans font-medium text-sm text-red-500">{formik.errors.password}</p> : ""
-                }
             </div>
 
-            <button type="submit" className="w-full bg-[#1877f2] transition-colors duration-300 text-white font-semibold py-3 rounded-md hover:bg-[#166fe5]">
+            <Button loading={formik.isSubmitting} type="submit" variant="contained" loadingPosition="end" color="primary" sx={{ textAlign: "center", marginInline: "auto", display: "flex", paddingInline: "40px", fontSize: "16px" }}>
                 Log in
-            </button>
+            </Button>
 
             <hr className="my-4 border border-dashed border-gray-300" />
 

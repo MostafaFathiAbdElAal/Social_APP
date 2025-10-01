@@ -20,18 +20,25 @@ export async function login(data: Values) {
             options
         );
         const res = await req.json();
-        if (res.message !== "success") return;
+        if (res.message === "success") {
 
-        (await cookies()).set("token", res.token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24,
-            path: "/"
-        })
-    
-        return res.message
+            (await cookies()).set("token", res.token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "strict",
+                maxAge: 60 * 60 * 24,
+                path: "/"
+            })
+        }
+
+
+        if (req.ok) {
+            return res.message
+        } else {
+            return res
+        }
     } catch (error) {
-        console.log(error);
+        console.log(error, "error:action");
+
     }
 }

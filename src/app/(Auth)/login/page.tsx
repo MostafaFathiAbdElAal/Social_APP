@@ -12,13 +12,7 @@ export default function Page() {
                     <h1 className="text-5xl font-bold font-sans socialApp">
                         Social app
                     </h1>
-                    <h2 className="mt-4 mb-1 text-4xl font-semibold text-black">
-                        Recent logins
-                    </h2>
-                    <p className="text-gray-600">Click your picture or add an account.</p>
-                    <div className="flex mt-6 rounded-sm">
-                        <CardLog />
-                    </div>
+                    
 
                 </div>
 

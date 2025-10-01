@@ -52,7 +52,7 @@ const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => {
 
     }, [data.message, dispatch])
     return (
-        <AppBar position="static">
+        <AppBar position="static" sx={{paddingBlock:"5px"}}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography
