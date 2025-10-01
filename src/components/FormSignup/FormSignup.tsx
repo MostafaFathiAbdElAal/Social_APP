@@ -1,0 +1,289 @@
+"use client"
+import { useFormik } from "formik"
+import * as Yup from "yup"
+import { useCallback, useMemo } from "react"
+import { signUp } from "@/actions/signup.action"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+export type SignupFormValues = {
+    name: string
+    email: string
+    password: string
+    rePassword: string
+    dateOfBirth: string
+    gender: string
+}
+
+const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+]
+
+export default function FormSignup() {
+    const currentYear = new Date().getFullYear()
+    const years = Array.from({ length: 120 }, (_, i) => currentYear - i)
+    const router = useRouter()
+    const formik = useFormik({
+        initialValues: {
+            firstName: "",
+            surname: "",
+            email: "",
+            password: "",
+            rePassword: "",
+            gender: "",
+            day: "1",
+            month: "Jan",
+            year: String(currentYear - 21),
+        },
+        validationSchema: Yup.object({
+            firstName: Yup.string().required("First name is required"),
+            surname: Yup.string().required("Surname is required"),
+            email: Yup.string().email("Invalid email").required("Email is required"),
+            password: Yup.string().min(6, "At least 6 characters").required("Password is required"),
+            rePassword: Yup.string()
+                .oneOf([Yup.ref("password")], "Passwords must match")
+                .required("Please confirm your password"),
+            gender: Yup.string().required("Gender is required"),
+            day: Yup.string().required("Day is required"),
+            month: Yup.string().required("Month is required"),
+            year: Yup.string().required("Year is required"),
+        }),
+        onSubmit: async (values) => {
+            const dob = `${values.day.padStart(2, "0")}/${String(
+                months.indexOf(values.month) + 1
+            ).padStart(2, "0")}/${values.year}`
+
+            const finalValues: SignupFormValues = {
+                name: `${values.firstName} ${values.surname}`,
+                email: values.email,
+                password: values.password,
+                rePassword: values.rePassword,
+                dateOfBirth: dob,
+                gender: values.gender.toLowerCase(),
+            }
+            signUp(finalValues).then((res) => {
+                if (res.error === 'user already exists.') {
+                    formik.setErrors({ email: res.error })
+                }
+                if(res.message === "success"){
+                    router.push("/login")
+                }
+            })
+
+        },
+    })
+
+    const daysInMonth = useMemo(() => {
+        const monthIndex = months.indexOf(formik.values.month)
+        const year = parseInt(formik.values.year)
+
+        if (monthIndex === 1) {
+            return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28
+        }
+        if ([3, 5, 8, 10].includes(monthIndex)) return 30
+        return 31
+    }, [formik.values.month, formik.values.year])
+
+    const formIsVaild = useCallback((): boolean => {
+        if (formik.isValid && formik.dirty) {
+            return false
+        } else {
+            return true
+        }
+    }, [formik.isValid, formik.dirty])
+
+
+
+
+    return (
+        <div className="bg-white rounded-md mt-6 shadow-lg  max-w-md mx-auto ">
+            <header className="p-6">
+                <h2 className="text-2xl font-bold text-center mb-1">
+                    Create a new account
+                </h2>
+                <p className="text-center text-gray-600">Its quick and easy.</p>
+
+            </header>
+
+            <form onSubmit={formik.handleSubmit} className="space-y-4 p-6 border-t-2 border-Lineborder border-dashed">
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            name="firstName"
+                            placeholder="First name"
+                            value={formik.values.firstName}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`w-full border rounded-md px-2 py-2 ${formik.touched.firstName && formik.errors.firstName
+                                ? "border-red-500 focus:border-gray-300"
+                                : "border-gray-300"
+                                }`}
+                        />
+                    </div>
+                    <div className="flex-1">
+                        <input
+                            type="text"
+                            name="surname"
+                            placeholder="Surname"
+                            value={formik.values.surname}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`w-full border rounded-md px-2 py-2 ${formik.touched.surname && formik.errors.surname
+                                ? "border-red-500 focus:border-gray-300"
+                                : "border-gray-300"
+                                }`}
+                        />
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm text-gray-600 mb-1">
+                        Date of birth
+                    </label>
+                    <div className="flex gap-2">
+                        <select
+                            name="day"
+                            value={formik.values.day}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`flex-1 border rounded-md px-2 py-2 ${formik.touched.day && formik.errors.day
+                                ? "border-red-500 focus:border-gray-300"
+                                : "border-gray-300"
+                                }`}
+                        >
+                            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((d) => (
+                                <option key={d} value={d}>
+                                    {d}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            name="month"
+                            value={formik.values.month}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`flex-1 border rounded-md px-2 py-2 ${formik.touched.month && formik.errors.month
+                                ? "border-red-500 focus:border-gray-300"
+                                : "border-gray-300"
+                                }`}
+                        >
+                            {months.map((m) => (
+                                <option key={m} value={m}>
+                                    {m}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            name="year"
+                            value={formik.values.year}
+                            onChange={formik.handleChange}
+                            onBlur={formik.handleBlur}
+                            className={`flex-1 border rounded-md px-2 py-2 ${formik.touched.year && formik.errors.year
+                                ? "border-red-500 focus:border-gray-300"
+                                : "border-gray-300"
+                                }`}
+                        >
+                            {years.map((y) => (
+                                <option key={y} value={y}>
+                                    {y}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm text-gray-600 mb-1">Gender</label>
+                    <div className="flex gap-3">
+                        {["Female", "Male"].map((g) => (
+                            <label
+                                key={g}
+                                className={`flex-1 border rounded-md px-2 py-1 flex justify-between items-center ${formik.touched.gender && formik.errors.gender
+                                    ? "border-red-500 focus:border-gray-300"
+                                    : "border-gray-300"
+                                    }`}
+                            >
+                                <span>{g}</span>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value={g}
+                                    checked={formik.values.gender === g}
+                                    onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
+                                />
+                            </label>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <input
+                        type="email"
+                        name="email"
+                        placeholder="Email address"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.email && formik.errors.email
+                            ? "border-red-500 focus:border-gray-300"
+                            : "border-gray-300"
+                            }`}
+                        autoComplete="email"
+
+                    />
+                </div>
+
+                <div>
+                    <input
+                        type="password"
+                        name="password"
+                        placeholder="New password"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.password && formik.errors.password
+                            ? "border-red-500 focus:border-gray-300"
+                            : "border-gray-300"
+                            }`}
+                        autoComplete="new-password"
+                    />
+                </div>
+
+                <div>
+                    <input
+                        type="password"
+                        name="rePassword"
+                        placeholder="Confirm password"
+                        value={formik.values.rePassword}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full border rounded-md px-2 py-2 ${formik.touched.rePassword && formik.errors.rePassword
+                            ? "border-red-500 focus:border-gray-300 "
+                            : "border-gray-300"
+                            }`}
+                        autoComplete="new-password"
+                    />
+                </div>
+
+                <div className="font-sans">
+                    <article className="mb-4 *:text-[11px] font-medium *:text-[#777] space-y-3">
+                        <p className="*:text-LinkColor">People who use our service may have uploaded your contact information to Facebook. <Link href={"/"}>Learn more.</Link></p>
+                        <p className="*:text-LinkColor">By clicking Sign Up, you agree to our <Link href={"/"}>Terms</Link>, <Link href={"/"}>Privacy Policy</Link> and <Link href={"/"}>Cookies Policy</Link>. You may receive SMS notifications from us and can opt out at any time.</p>
+                    </article>
+                    <button
+                        type="submit"
+                        disabled={formIsVaild()}
+                        className={`${!formik.isValid || !formik.dirty ? "cursor-not-allowed" : ""} text-center block mx-auto bg-green-600 hover:bg-green-700 text-white font-bold px-15 py-2 rounded-md transition-colors duration-150`}
+                    >
+                        Sign Up
+                    </button>
+                </div>
+                <Link href={"/login"} className="text-LinkColor text-lg font-medium text-center block">Already have an account?</Link>
+            </form>
+        </div>
+    )
+}
