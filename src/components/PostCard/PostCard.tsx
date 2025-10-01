@@ -16,14 +16,16 @@ import InitialAvatar from "../InitialAvatar/InitialAvatar";
 import { formatTimeAgo } from "@/utils/FormatTimeAgo";
 import { useFormik } from "formik";
 import { useAppSelector } from "@/hooks/Redux.hook";
-
+import * as Yup from "yup"
 const COMMENTS_INCREMENT = 15; // ✅ بدل 10 خلتها 20
 
 
 interface PostCardProps {
     post: Post;
 }
-
+const validationSchema = Yup.object({
+    content: Yup.string().required().min(2).max(400)
+})
 export default function PostCard({ post }: PostCardProps) {
     const [open, setOpen] = useState(false);
     const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_INCREMENT);
@@ -33,7 +35,11 @@ export default function PostCard({ post }: PostCardProps) {
             content: "",
             post: `${post._id}`
         },
+        validationSchema,
+        onSubmit: (values) => {
+            console.log(values);
 
+        }
     })
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -275,7 +281,7 @@ export default function PostCard({ post }: PostCardProps) {
                         <form onSubmit={formik.handleSubmit} className="flex items-start gap-2"> {/* items-start بدلاً من items-end */}
                             {/* Avatar مع أيقونة الـ Dropdown */}
                             <div className="flex flex-col items-center rounded-full overflow-hidden">
-                                <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain"/>
+                                <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
                             </div>
 
                             {/* حاوية حقل الإدخال والأيقونات وزر الإرسال */}

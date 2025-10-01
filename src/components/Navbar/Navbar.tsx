@@ -9,7 +9,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import MenuItem from '@mui/material/MenuItem';
-import { useEffect, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import logout from '@/actions/logout.action';
 import Link from 'next/link';
@@ -25,14 +25,18 @@ export default function Navbar() {
     const currentURL: string = usePathname()
     const data = useAppSelector((store) => store.userReducer.data)
     const dispatch = useAppDispatch()
-    const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
-        setAnchorElNav(event.currentTarget);
-    };
 
-    const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-        setAnchorElUser(event.currentTarget);
-    };
 
+
+const handleOpenNavMenu = (event: MouseEvent<HTMLButtonElement>) => {
+    setAnchorElNav(event.currentTarget);
+};
+
+const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => { 
+    setAnchorElUser(event.currentTarget);
+};
+
+// ...
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
@@ -108,7 +112,7 @@ export default function Navbar() {
                     <Box sx={{ flexGrow: 1 }} />
 
                     <Box sx={{ flexGrow: 0 }}>
-                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                        <IconButton  onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                             <Avatar alt={data.user.name} src={data.user.photo} />
                         </IconButton>
 
