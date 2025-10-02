@@ -5,7 +5,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     return myPages.map((page) => {
         return {
-            url: `${process.env.BASEURL}${page}`,
+            url: `${process.env.NEXT_PUBLIC_BASEURL}${page}`,
             priority: 1,
             lastModified: new Date()
         }

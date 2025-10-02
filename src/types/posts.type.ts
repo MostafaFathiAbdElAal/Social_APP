@@ -18,7 +18,7 @@ export interface Post {
     user: User;
     createdAt: string;
     comments: Comment[];
-    image : StaticImageData
+    image: StaticImageData
 }
 
 export interface User {
@@ -32,4 +32,12 @@ export interface Comment {
     commentCreator: User;
     post: string;
     createdAt: string;
+}
+export interface SinglePostResponse {
+    message: string;
+    post: Post;
+}
+export interface Comments {
+    message: string,
+    comments: Comment[]
 }

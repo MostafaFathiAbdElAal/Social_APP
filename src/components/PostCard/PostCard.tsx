@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useMemo, useRef, useEffect } from "react";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
@@ -9,42 +8,52 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from "@mui/icons-material/Share";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
-import { Box, InputBase } from "@mui/material"; // استخدام InputBase لمرونة التصميم
-import { Post } from "@/types/posts.type";
+import { Box, Button, InputBase } from "@mui/material"; 
+import { Comment, Post } from "@/types/posts.type";
 import Image from "next/image";
 import InitialAvatar from "../InitialAvatar/InitialAvatar";
 import { formatTimeAgo } from "@/utils/FormatTimeAgo";
 import { useFormik } from "formik";
 import { useAppSelector } from "@/hooks/Redux.hook";
 import * as Yup from "yup"
-const COMMENTS_INCREMENT = 15; // ✅ بدل 10 خلتها 20
+import { createComment } from "@/actions/createCpmment.action";
+import DisplayComment from "../DisplayComment/DisplayComment";
+import toast from "react-hot-toast";
+const COMMENTS_INCREMENT = 15; 
 
 
 interface PostCardProps {
     post: Post;
 }
 const validationSchema = Yup.object({
-    content: Yup.string().required().min(2).max(400)
+    content: Yup.string().required().min(1).max(30)
 })
 export default function PostCard({ post }: PostCardProps) {
     const [open, setOpen] = useState(false);
     const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_INCREMENT);
     const myAccount = useAppSelector((store) => store.userReducer.data.user)
+    const [fullComments, setFullComments] = useState<Comment[]>(post.comments);
     const formik = useFormik({
         initialValues: {
-            content: "",
-            post: `${post._id}`
+            content: ""
         },
         validationSchema,
-        onSubmit: (values) => {
-            console.log(values);
+        onSubmit: async (values) => {
+            await createComment({ ...values, post: `${post._id}` }).then((res) => {
+
+                if (res && res.message) {
+                    setFullComments(res.comments)
+                    formik.resetForm({
+                        values: { content: "" }
+                    });
+                }
+            })
 
         }
     })
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-    const fullComments = post.comments;
 
     const handleOpenComments = () => {
         setVisibleCommentsCount(COMMENTS_INCREMENT);
@@ -188,7 +197,22 @@ export default function PostCard({ post }: PostCardProps) {
                     <ChatBubbleOutlineIcon fontSize="small" className="mr-2" />
                     <span className="text-sm font-semibold">Comment</span>
                 </button>
-                <button className="flex items-center justify-center flex-1 py-2 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-600 transition-colors duration-200">
+                <button onClick={() => {
+                    const shareUrl = `${process.env.NEXT_PUBLIC_BASEURL}/post/${post._id}`;
+                    const shareData = {
+                        title: post.user.name,
+                        text: post.body?.slice(0, 100) || "Check this post",
+                        url: shareUrl,
+                    };
+
+                    if (navigator.canShare && navigator.canShare(shareData)) {
+                        navigator.share(shareData).catch((err) => console.error("Share failed:", err));
+                    } else {
+                        navigator.clipboard.writeText(shareUrl);
+                        toast.success("Copied to clipboard 📋", { duration: 1500 })
+
+                    }
+                }} className="flex items-center justify-center flex-1 py-2 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-600 transition-colors duration-200">
                     <ShareIcon fontSize="small" className="mr-2" />
                     <span className="text-sm font-semibold">Share</span>
                 </button>
@@ -219,7 +243,7 @@ export default function PostCard({ post }: PostCardProps) {
             )}
 
             <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-                <div className="flex flex-col max-h-[90vh]">
+                <div className="flex flex-col max-h-[90vh] overflow-hidden">
 
                     {/* Header */}
                     <div className="p-4 flex justify-between items-center border-b border-gray-200 sticky top-0 bg-white z-20">
@@ -232,38 +256,21 @@ export default function PostCard({ post }: PostCardProps) {
                     {/* Body - Comments List (Scrollable) */}
                     <div
                         ref={scrollContainerRef}
-                        className="flex-grow overflow-y-auto px-5 pt-5 pb-20 comments-scroll-container"
+                        className="flex-grow overflow-y-auto px-5 pt-5 comments-scroll-container"
                         style={{ minHeight: '100px' }}
                     >
                         {displayedComments.length > 0 ? (
                             displayedComments.map((comment, index) => {
                                 const isLast = index === displayedComments.length - 1;
-                                return (
-                                    <div
-                                        key={comment._id}
-                                        ref={isLast && hasMoreComments ? loadMoreRef : null}
-                                        className="flex gap-3 mb-4 items-start"
-                                    >
-                                        <InitialAvatar name={comment.commentCreator.name} size="medium" />
-                                        <div className="flex flex-col flex-grow bg-gray-50 rounded-lg p-3">
-                                            <div className="flex justify-between items-center">
-                                                <span className="font-bold text-sm text-gray-800 hover:underline cursor-pointer">
-                                                    {comment.commentCreator.name}
-                                                </span>
-                                                <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
-                                            </div>
-                                            <p className="text-sm text-gray-700 mt-1">{comment.content}</p>
-                                            <div className="flex gap-3 text-xs mt-2">
-                                                <button className="text-gray-500 hover:text-blue-500 font-medium transition-colors duration-150">Like</button>
-                                                <button className="text-gray-500 hover:text-blue-500 font-medium transition-colors duration-150">Reply</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
+                                return <div key={comment._id} ref={isLast && hasMoreComments ? loadMoreRef : null}
+                                >
+                                    <DisplayComment comment={comment} />
+
+                                </div>
                             })
                         ) : (
                             <p className="text-center text-gray-500 py-6 text-base italic">
-                                كن أول من يشارك أفكاره! 🚀
+                                Share your ideas 🚀
                             </p>
                         )}
 
@@ -277,35 +284,30 @@ export default function PostCard({ post }: PostCardProps) {
                     <div
                         className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-20" // padding أقل قليلاً
                     >
-                        <form onSubmit={formik.handleSubmit} className="flex items-start gap-2"> 
+                        <form onSubmit={formik.handleSubmit} className="flex items-start gap-2">
                             <div className="flex flex-col items-center rounded-full overflow-hidden">
                                 <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
                             </div>
 
                             <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative"> {/* Rounded-lg و Shadow */}
                                 <InputBase
-                                    placeholder={`Comment as ${myAccount.name}`} 
+                                    placeholder={`Comment as ${myAccount.name}`}
                                     fullWidth
                                     multiline
                                     maxRows={4}
                                     name="content"
+                                    value={formik.values.content}
                                     onChange={formik.handleChange}
+                                    onBlur={formik.handleBlur}
                                     className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10" // مسافة لزر الإرسال
-
                                 />
 
-                                {/* زر الإرسال داخل حقل الإدخال */}
-                                <IconButton
-                                    type="submit"
-                                    size="small"
-                                    className={`
-                                        absolute right-2 top-2 
-                                        text-indigo-600 hover:text-indigo-700'}
-                                        transition-colors duration-150
-                                    `}
-                                >
-                                    <SendIcon fontSize="small" />
-                                </IconButton>
+                                <Button loading={formik.isSubmitting} type="submit" loadingPosition="center" color="primary"
+                                    className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150
+                                    `}>
+                                    {!formik.isSubmitting ? <SendIcon fontSize="small" /> : ""}
+                                </Button>
+
 
 
                             </Box>

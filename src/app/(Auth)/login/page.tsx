@@ -1,4 +1,3 @@
-import CardLog from "@/components/CardLog/CardLog";
 import FormLogin from "@/components/FormLogin/FormLogin";
 export default function Page() {
 

@@ -5,7 +5,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <>
       <Navbar />
-      <main className="container mx-auto min-h-screen p-2">
+      <main className="container mx-auto min-h-screen flex-col flex-1 p-2">
 
       {children}
       </main>

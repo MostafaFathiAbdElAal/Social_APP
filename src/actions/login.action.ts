@@ -38,7 +38,7 @@ export async function login(data: Values) {
             return res
         }
     } catch (error) {
-        console.log(error, "error:action");
+        console.log(error);
 
     }
 }

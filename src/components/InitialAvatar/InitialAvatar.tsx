@@ -11,7 +11,6 @@ export default function InitialAvatar ({ name, size }:InitialAvatarProps) {
         ? "w-10 h-10 text-base" 
         : "w-8 h-8 text-sm";
     
-    // استخدام لون عشوائي بناءً على الحرف الأول أو اسم المستخدم لتجنب تكرار الألوان
     const colorHash = name.charCodeAt(0) % 5;
     const colors = ["bg-blue-500", "bg-green-500", "bg-purple-500", "bg-pink-500", "bg-amber-500"];
     const bgColor = colors[colorHash];
