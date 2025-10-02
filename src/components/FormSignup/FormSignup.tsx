@@ -1,7 +1,7 @@
 "use client"
 import { useFormik } from "formik"
 import * as Yup from "yup"
-import { useCallback, useMemo } from "react"
+import { useMemo } from "react"
 import { signUp } from "@/actions/signup.action"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -48,29 +48,24 @@ export default function FormSignup() {
                 .min(8, "Password must be at least 8 characters long")
                 .required("Password is required")
 
-                // 1. حرف كبير واحد على الأقل
                 .test(
                     'hasUpperCase',
                     'Must contain at least one uppercase letter',
-                    // 🚨 تحديد نوع val بشكل صريح
                     (val: PasswordValue) => {
                         if (!val) return false;
                         return /[A-Z]/.test(val);
                     }
                 )
-                // 2. حرف صغير واحد على الأقل
                 .test(
                     'hasLowerCase',
                     'Must contain at least one lowercase letter',
                     (val: PasswordValue) => val ? /[a-z]/.test(val) : false
                 )
-                // 3. رقم واحد على الأقل
                 .test(
                     'hasNumber',
                     'Must contain at least one number',
                     (val: PasswordValue) => val ? /[0-9]/.test(val) : false
                 )
-                // 4. رمز خاص واحد على الأقل
                 .test(
                     'hasSpecialChar',
                     'Must contain at least one special character',
@@ -98,7 +93,7 @@ export default function FormSignup() {
                 dateOfBirth: dob,
                 gender: values.gender.toLowerCase(),
             }
-             await signUp(finalValues).then((res) => {
+            await signUp(finalValues).then((res) => {
                 if (res.error === 'user already exists.') {
                     formik.setErrors({ email: res.error })
                 } else if (res.message === "success") {
@@ -126,17 +121,6 @@ export default function FormSignup() {
         return 31
     }, [formik.values.month, formik.values.year])
 
-    const formIsVaild = useCallback((): boolean => {
-        if (formik.isValid && formik.dirty) {
-            return false
-        } else {
-            return true
-        }
-    }, [formik.isValid, formik.dirty])
-
-
-
-
     return (
         <div className="bg-white rounded-md mt-6 shadow-lg  max-w-md mx-auto ">
             <header className="p-6">
@@ -153,7 +137,7 @@ export default function FormSignup() {
                         <TextField
                             type="text"
                             name="firstName"
-                            
+
                             label="First name"
                             value={formik.values.firstName}
                             onChange={formik.handleChange}
@@ -319,10 +303,10 @@ export default function FormSignup() {
                         <p className="*:text-LinkColor">People who use our service may have uploaded your contact information to SocialAPP. <Link href={"/"}>Learn more.</Link></p>
                         <p className="*:text-LinkColor">By clicking Sign Up, you agree to our <Link href={"/"}>Terms</Link>, <Link href={"/"}>Privacy Policy</Link> and <Link href={"/"}>Cookies Policy</Link>. You may receive SMS notifications from us and can opt out at any time.</p>
                     </article>
-                    <Button loading={formik.isSubmitting} type="submit" variant="contained" loadingPosition="end" sx={{textAlign:"center",marginInline:"auto",display:"flex",paddingInline:"40px",fontSize:"16px"}} color="success">
+                    <Button loading={formik.isSubmitting} type="submit" variant="contained" loadingPosition="end" sx={{ textAlign: "center", marginInline: "auto", display: "flex", paddingInline: "40px", fontSize: "16px" }} color="success">
                         Sign Up
                     </Button>
-                    
+
                 </div>
                 <Link href={"/login"} className="text-LinkColor text-lg font-medium text-center block">Already have an account?</Link>
             </form>

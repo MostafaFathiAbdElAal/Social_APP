@@ -15,23 +15,19 @@ const validationSchema = Yup.object({
     password: Yup.string().min(8, "Password must be at least 8 characters long")
         .required("Password is required")
 
-        // 1. حرف كبير واحد على الأقل
         .test(
             'hasUpperCase',
             'Must contain at least one uppercase letter',
-            // 🚨 تحديد نوع val بشكل صريح
             (val: PasswordValue) => {
                 if (!val) return false;
                 return /[A-Z]/.test(val);
             }
         )
-        // 2. حرف صغير واحد على الأقل
         .test(
             'hasLowerCase',
             'Must contain at least one lowercase letter',
             (val: PasswordValue) => val ? /[a-z]/.test(val) : false
         )
-        // 3. رقم واحد على الأقل
         .test(
             'hasNumber',
             'Must contain at least one number',
