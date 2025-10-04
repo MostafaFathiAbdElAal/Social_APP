@@ -10,7 +10,6 @@ import { removeComment } from "@/actions/removeComment.action"
 import toast from "react-hot-toast"
 import { useFormik } from "formik"
 import { updateComment } from "@/actions/updateComment.action"
-import SharingSocial from "../SocialSharing/SocialSharing"
 
 interface InitialReducer {
     isLoading?: boolean,
@@ -199,6 +198,5 @@ export default function DisplayComment({ comment }: { comment: pageProps }) {
                 )}
             </div>
         </div>
-        <SharingSocial url="h" />
     </div>
 };
