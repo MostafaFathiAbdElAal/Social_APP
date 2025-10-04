@@ -1,6 +1,7 @@
 "use server"
 
 import { SignupFormValues } from "@/components/FormSignup/FormSignup";
+import { env } from "@/env";
 export async function signUp(data: SignupFormValues) {
     let res;
     try {
@@ -13,7 +14,7 @@ export async function signUp(data: SignupFormValues) {
         };
 
         const req = await fetch(
-            `${process.env.APIBASEURL}/users/signup`,
+            `${env.APIBASEURL}/users/signup`,
             options
         );
         res = await req.json();

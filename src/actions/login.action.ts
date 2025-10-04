@@ -1,4 +1,5 @@
 "use server"
+import { env } from "@/env";
 import { cookies } from "next/headers";
 type Values = {
     email: string;
@@ -16,19 +17,18 @@ export async function login(data: Values) {
         };
 
         const req = await fetch(
-            `${process.env.APIBASEURL}/users/signin`,
+            `${env.APIBASEURL}/users/signin`,
             options
         );
         const res = await req.json();
         if (res.message === "success") {
-
-            (await cookies()).set("token", res.token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: "strict",
-                maxAge: 60 * 60 * 24,
-                path: "/"
-            })
+                (await cookies()).set("token", res.token, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: "strict",
+                    maxAge: 60 * 60 * 24,
+                    path: "/"
+                })
         }
 
 

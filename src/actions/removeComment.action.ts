@@ -2,23 +2,32 @@
 import { env } from "@/env";
 import { cookies } from "next/headers";
 
-export async function getPost(id: string) {
+
+export async function removeComment(commentId: string) {
     const token = (await cookies()).get("token")?.value
     try {
         const options: RequestInit = {
-            method: "GET",
+            method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
                 token: token ?? ""
             },
-            next: { revalidate: 43200 },
         };
 
         const req = await fetch(
-            `${env.APIBASEURL}/posts/${id}`,
+            `${env.APIBASEURL}/comments/${commentId}`,
             options
         );
         const res = await req.json();
+        /*
+
+        API dosent work when work log data and
+        dont forget rebuild page below 👇  
+        if (res.message === "success") {
+                rebuildPostPage(res.comment.post)
+            }
+            
+            */
         return res
     } catch (error) {
 

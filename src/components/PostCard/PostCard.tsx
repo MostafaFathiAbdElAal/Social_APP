@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, useReducer } from "react";
 import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -8,7 +8,7 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ShareIcon from "@mui/icons-material/Share";
 import CloseIcon from "@mui/icons-material/Close";
 import SendIcon from "@mui/icons-material/Send";
-import { Box, Button, InputBase } from "@mui/material"; 
+import { Box, Button, InputBase, Tooltip } from "@mui/material";
 import { Comment, Post } from "@/types/posts.type";
 import Image from "next/image";
 import InitialAvatar from "../InitialAvatar/InitialAvatar";
@@ -16,23 +16,80 @@ import { formatTimeAgo } from "@/utils/FormatTimeAgo";
 import { useFormik } from "formik";
 import { useAppSelector } from "@/hooks/Redux.hook";
 import * as Yup from "yup"
-import { createComment } from "@/actions/createCpmment.action";
+import { createComment } from "@/actions/createComment.action";
 import DisplayComment from "../DisplayComment/DisplayComment";
 import toast from "react-hot-toast";
-const COMMENTS_INCREMENT = 15; 
+
+const COMMENTS_INCREMENT = 15;
 
 
 interface PostCardProps {
     post: Post;
 }
 const validationSchema = Yup.object({
-    content: Yup.string().required().min(1).max(30)
+    content: Yup.string().required().min(2).max(30)
 })
+
+interface CommentState {
+    open: boolean;
+    fullComments: Comment[];
+    visibleCommentsCount: number;
+}
+
+type CommentAction = 
+    | { type: "HANDLE_OPEN_COMMENTS" }
+    | { type: "HANDLE_CLOSE_COMMENTS" }
+    | { type: "SET_FULL_COMMENTS", payload: { comments: Comment[] } }
+    | { type: "SET_VISIBLE_COMMENTS_COUNT", payload: { count: number } };
+
+const initialReducer: (initialComments: Comment[]) => CommentState = (initialComments) => ({
+    open: false,
+    fullComments: initialComments,
+    visibleCommentsCount: COMMENTS_INCREMENT
+});
+
+const reducer = function (state: CommentState, action: CommentAction): CommentState {
+    switch (action.type) {
+        case "HANDLE_OPEN_COMMENTS":
+            return {
+                ...state,
+                visibleCommentsCount: COMMENTS_INCREMENT,
+                open: true
+            }
+        case "HANDLE_CLOSE_COMMENTS":
+            return {
+                ...state,
+                open: false
+            }
+        case "SET_FULL_COMMENTS":
+            return {
+                ...state,
+                fullComments: action.payload.comments,
+            }
+        case "SET_VISIBLE_COMMENTS_COUNT":
+            return {
+                ...state,
+                visibleCommentsCount: action.payload.count,
+            }
+        default:
+            return state
+    }
+}
+
 export default function PostCard({ post }: PostCardProps) {
-    const [open, setOpen] = useState(false);
-    const [visibleCommentsCount, setVisibleCommentsCount] = useState(COMMENTS_INCREMENT);
+    const [states, dispatch] = useReducer(reducer, post.comments, initialReducer)
+    
     const myAccount = useAppSelector((store) => store.userReducer.data.user)
-    const [fullComments, setFullComments] = useState<Comment[]>(post.comments);
+    
+    const namesAccounts = useMemo(() => {
+        const nameAccountComments = states.fullComments.map((comment) => {
+            return comment.commentCreator.name
+        })
+        const names = [...new Set(nameAccountComments)]
+        return names
+    }, [states.fullComments])
+
+
     const formik = useFormik({
         initialValues: {
             content: ""
@@ -42,46 +99,56 @@ export default function PostCard({ post }: PostCardProps) {
             await createComment({ ...values, post: `${post._id}` }).then((res) => {
 
                 if (res && res.message) {
-                    setFullComments(res.comments)
+                    dispatch({
+                        type: "SET_FULL_COMMENTS",
+                        payload: { comments: res.comments }
+                    });
+                    
                     formik.resetForm({
                         values: { content: "" }
                     });
                 }
             })
-
         }
     })
+    
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
-
     const handleOpenComments = () => {
-        setVisibleCommentsCount(COMMENTS_INCREMENT);
-        setOpen(true);
+        dispatch({ type: "HANDLE_OPEN_COMMENTS" })
     };
 
     const handleClose = () => {
-        setOpen(false);
+        dispatch({ type: "HANDLE_CLOSE_COMMENTS" })
     };
 
     const sortedComments = useMemo(() => {
-        return [...fullComments].sort(
+        return [...states.fullComments].sort(
             (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-    }, [fullComments]);
+    }, [states.fullComments]);
 
-    const displayedComments = sortedComments.slice(0, visibleCommentsCount);
+    const displayedComments = sortedComments.slice(0, states.visibleCommentsCount);
     const previewComments = sortedComments.slice(0, 3);
-    const hasMoreComments = visibleCommentsCount < fullComments.length;
+    const hasMoreComments = states.visibleCommentsCount < states.fullComments.length;
 
     useEffect(() => {
-        if (!open || !hasMoreComments) return;
+        if (!states.open || !hasMoreComments) return;
 
         const container = scrollContainerRef.current;
         const loader = loadMoreRef.current;
-
+        
+        const loadMoreComments = () => {
+            dispatch({
+                type: "SET_VISIBLE_COMMENTS_COUNT",
+                payload: {
+                    count: Math.min(states.visibleCommentsCount + COMMENTS_INCREMENT, states.fullComments.length)
+                }
+            });
+        };
+        
         if (!container || !loader) {
-            // نستنى الـ refs لما تتظبط بعد render
             const timer = setTimeout(() => {
                 const containerCheck = scrollContainerRef.current;
                 const loaderCheck = loadMoreRef.current;
@@ -90,14 +157,12 @@ export default function PostCard({ post }: PostCardProps) {
                         (entries) => {
                             const target = entries[0];
                             if (target.isIntersecting) {
-                                setVisibleCommentsCount((prev) =>
-                                    Math.min(prev + COMMENTS_INCREMENT, fullComments.length)
-                                );
+                                loadMoreComments();
                             }
                         },
                         {
                             root: containerCheck,
-                            rootMargin: "300px",
+                            rootMargin: "100px",
                             threshold: 1.0,
                         }
                     );
@@ -111,9 +176,7 @@ export default function PostCard({ post }: PostCardProps) {
             (entries) => {
                 const target = entries[0];
                 if (target.isIntersecting) {
-                    setVisibleCommentsCount((prev) =>
-                        Math.min(prev + COMMENTS_INCREMENT, fullComments.length)
-                    );
+                    loadMoreComments();
                 }
             },
             {
@@ -128,7 +191,8 @@ export default function PostCard({ post }: PostCardProps) {
         return () => {
             if (loader) observer.unobserve(loader);
         };
-    }, [open, hasMoreComments, fullComments.length, visibleCommentsCount]);
+    }, [states.open, states.visibleCommentsCount, states.fullComments, hasMoreComments]);
+    
     return (
         <div className="max-w-xl min-w-xs w-full mx-auto bg-white shadow-2xl rounded-xl border border-gray-100 mb-8 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3">
@@ -173,16 +237,35 @@ export default function PostCard({ post }: PostCardProps) {
             )}
 
 
-            <div className="flex justify-between items-center px-5 pt-3">
-                <span className="text-sm text-gray-500 font-medium hover:underline cursor-pointer">
-                    0 Likes
-                </span>
-                <button
-                    onClick={handleOpenComments}
-                    className="text-sm text-gray-500 font-medium hover:underline cursor-pointer"
+            <div className="flex justify-end items-center px-5 pt-3 ">
+                <Tooltip
+                    classes={{ tooltip: "max-h-43 bg-black/60" }}
+                    title={
+                        <div >
+                            {namesAccounts.slice(0, 9).map((name, index) => (
+                                <div className="min-w-20 max-w-40 h-4 overflow-hidden font-sans font-medium" key={index}>
+                                    {name}
+                                </div>
+                            ))}
+                            {hasMoreComments && (
+                                <div onClick={handleOpenComments} className="flex justify-center text-white font-medium hover:cursor-pointer">
+                                    View all ...
+                                </div>)
+                            }
+
+                        </div>
+                    }
+                    arrow
+                    placement="top"
                 >
-                    {fullComments.length} Comments
-                </button>
+                    <button
+                        onClick={handleOpenComments}
+                        className="text-sm text-gray-500 font-medium hover:underline cursor-pointer"
+                    >
+                        {states.fullComments.length} Comments
+                    </button>
+                </Tooltip>
+
             </div>
 
             <div className="border-t border-gray-100 px-3 py-1 mt-2 flex items-center justify-around">
@@ -201,8 +284,9 @@ export default function PostCard({ post }: PostCardProps) {
                     const shareUrl = `${process.env.NEXT_PUBLIC_BASEURL}/post/${post._id}`;
                     const shareData = {
                         title: post.user.name,
-                        text: post.body?.slice(0, 100) || "Check this post",
                         url: shareUrl,
+                        Image: String(post.user.photo),
+
                     };
 
                     if (navigator.canShare && navigator.canShare(shareData)) {
@@ -219,7 +303,8 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
 
             {previewComments.length > 0 && (
-                <div className="px-5 pt-2 pb-4 border-t border-gray-100">
+                <div onClick={handleOpenComments} className="hover:cursor-pointer px-5 pt-2 pb-4 border-t border-gray-100">
+
                     {previewComments.map((comment) => (
                         <div key={comment._id} className="flex gap-3 mb-2 items-start mt-1">
                             <InitialAvatar name={comment.commentCreator.name} size="small" />
@@ -231,29 +316,26 @@ export default function PostCard({ post }: PostCardProps) {
                             </div>
                         </div>
                     ))}
-                    {fullComments.length > previewComments.length && (
+                    {states.fullComments.length > previewComments.length && (
                         <button
-                            onClick={handleOpenComments}
                             className="text-sm text-indigo-600 hover:text-indigo-700 font-medium mt-1 ml-11 transition-colors duration-150"
                         >
-                            View all {fullComments.length} comments
+                            View all {states.fullComments.length} comments
                         </button>
                     )}
                 </div>
             )}
 
-            <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+            <Dialog open={states.open} classes={{ root: "z-5000" }} disableScrollLock onClose={handleClose} fullWidth maxWidth="sm">
                 <div className="flex flex-col max-h-[90vh] overflow-hidden">
 
-                    {/* Header */}
                     <div className="p-4 flex justify-between items-center border-b border-gray-200 sticky top-0 bg-white z-20">
-                        <h2 className="text-xl font-bold text-gray-800">Comments ({fullComments.length})</h2>
+                        <h2 className="text-xl font-bold text-gray-800">Comments ({states.fullComments.length})</h2>
                         <IconButton onClick={handleClose} size="medium" className="text-gray-600 hover:text-red-500">
                             <CloseIcon />
                         </IconButton>
                     </div>
 
-                    {/* Body - Comments List (Scrollable) */}
                     <div
                         ref={scrollContainerRef}
                         className="flex-grow overflow-y-auto px-5 pt-5 comments-scroll-container"
@@ -289,7 +371,8 @@ export default function PostCard({ post }: PostCardProps) {
                                 <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
                             </div>
 
-                            <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative"> {/* Rounded-lg و Shadow */}
+                            <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative">
+
                                 <InputBase
                                     placeholder={`Comment as ${myAccount.name}`}
                                     fullWidth
@@ -299,17 +382,18 @@ export default function PostCard({ post }: PostCardProps) {
                                     value={formik.values.content}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10" // مسافة لزر الإرسال
+                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10" 
                                 />
+                                <Tooltip title={formik.errors.content} arrow disableFocusListener={true} disableHoverListener={true} disableTouchListener={true}
+                                    open placement="top"
 
-                                <Button loading={formik.isSubmitting} type="submit" loadingPosition="center" color="primary"
-                                    className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150
+                                >
+                                    <Button loading={formik.isSubmitting} type="submit" loadingPosition="center" color="primary"
+                                        className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150 min-h-8 min-w-8 rounded-full
                                     `}>
-                                    {!formik.isSubmitting ? <SendIcon fontSize="small" /> : ""}
-                                </Button>
-
-
-
+                                        {!formik.isSubmitting ? <SendIcon fontSize="small" /> : ""}
+                                    </Button>
+                                </Tooltip>
                             </Box>
                         </form>
                     </div>

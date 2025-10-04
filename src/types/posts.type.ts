@@ -32,6 +32,7 @@ export interface Comment {
     commentCreator: User;
     post: string;
     createdAt: string;
+    id?:string
 }
 export interface SinglePostResponse {
     message: string;
@@ -40,4 +41,8 @@ export interface SinglePostResponse {
 export interface Comments {
     message: string,
     comments: Comment[]
+}
+export interface UpdateCommentResponse {
+  message: string;
+  comment: Comment;
 }

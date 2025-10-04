@@ -52,6 +52,8 @@ export default function FormLogin() {
                 if (res === "success") {
                     toast.success("Login succeeded", { duration: 1000 })
                     dispatch(getDataUser())
+                    
+                    
                     setTimeout(() => {
                         router.push("/")
                     }, 1000)

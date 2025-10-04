@@ -28,15 +28,15 @@ export default function Navbar() {
 
 
 
-const handleOpenNavMenu = (event: MouseEvent<HTMLButtonElement>) => {
-    setAnchorElNav(event.currentTarget);
-};
+    const handleOpenNavMenu = (event: MouseEvent<HTMLButtonElement>) => {
+        setAnchorElNav(event.currentTarget);
+    };
 
-const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => { 
-    setAnchorElUser(event.currentTarget);
-};
+    const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => {
+        setAnchorElUser(event.currentTarget);
+    };
 
-// ...
+    // ...
     const handleCloseNavMenu = () => {
         setAnchorElNav(null);
     };
@@ -52,7 +52,7 @@ const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => {
 
     }, [data.message, dispatch])
     return (
-        <AppBar position="static" sx={{paddingBlock:"5px"}}>
+        <AppBar position="static" sx={{ paddingBlock: "5px" }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography
@@ -112,8 +112,9 @@ const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => {
                     <Box sx={{ flexGrow: 1 }} />
 
                     <Box sx={{ flexGrow: 0 }}>
-                        <IconButton  onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                        <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                             <Avatar alt={data.user.name} src={data.user.photo} />
+
                         </IconButton>
 
                         <Menu
@@ -254,6 +255,7 @@ const handleOpenUserMenu = (event: MouseEvent<HTMLButtonElement>) => {
                                         className="group cursor-pointer relative flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-red-50 transition-all duration-200"
                                         onClick={() => {
                                             logout().then(() => {
+                                                localStorage.removeItem("User")
                                                 router.push("/login")
 
                                             })

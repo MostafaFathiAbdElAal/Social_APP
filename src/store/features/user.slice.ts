@@ -32,6 +32,10 @@ const userSlice = createSlice({
     extraReducers: function (builder) {
         builder.addCase(getDataUser.fulfilled, (state, action) => {
             state.data = action.payload?.data
+            if (state.data.message === "success") {
+                localStorage.setItem("User", state.data.user._id)
+
+            }
         })
         builder.addCase(getDataUser.rejected, (_, action) => {
             console.log("error", action.error);

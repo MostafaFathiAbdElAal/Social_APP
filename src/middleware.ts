@@ -1,30 +1,25 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export default function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
-  // Current URL
   const pathName = req.nextUrl.pathname;
-  const guestRoutes = ["/login", "/signup"];
-  const protectedRoutes = ["/"];
 
-  if (protectedRoutes.some((route) => pathName.includes(route))) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
+  const PUBLIC_ROUTES = ["/login", "/signup"];
+
+  const isPublic = PUBLIC_ROUTES.includes(pathName);
+
+  // لو الراوت مش عام و مفيش توكن → يروح للوجين
+  if (!isPublic && !token) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (guestRoutes.includes(pathName)) {
-    if (token) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
+  if (isPublic && token) {
+    return NextResponse.redirect(new URL("/", req.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    "/((?!login|signup))",
-  ],
+  matcher: ["/((?!_next|api).*)"], 
 };
-

@@ -39,7 +39,7 @@ export default function RootLayout({
           <ThemeProvider theme={theme}>
             <ReduxProvider>
             {children}
-            <Toaster />
+            <Toaster containerStyle={{textAlign:"center",fontFamily:"sans-serif"}}/>
             </ReduxProvider>
           
           </ThemeProvider>

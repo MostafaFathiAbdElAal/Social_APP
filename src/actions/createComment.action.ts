@@ -1,6 +1,8 @@
 "use server"
+import { env } from "@/env";
 import { Comments } from "@/types/posts.type";
 import { cookies } from "next/headers";
+import { rebuildPostPage } from "./rebuildPages";
 interface Values {
     content: string,
     post: string
@@ -19,12 +21,19 @@ export async function createComment(values: Values) {
         };
 
         const req = await fetch(
-            `${process.env.APIBASEURL}/comments`,
+            `${env.APIBASEURL}/comments`,
             options
         );
         const res: Comments = await req.json();
         let comments;
+        for (const key in res.comments[0]) {
+
+            console.log(key)
+        }
+        console.log(res.comments[0].id === res.comments[0]._id);
+
         if (res.message === "success") {
+
             comments = res.comments.map((comment) => {
                 return {
                     _id: comment._id,
@@ -35,15 +44,15 @@ export async function createComment(values: Values) {
                 }
 
             })
-
+            rebuildPostPage(values.post)
             return {
                 message: res.message,
                 comments
             }
-        }else{
+        } else {
             return res
         }
-        
+
     } catch (error) {
 
         console.log(error, "error");
