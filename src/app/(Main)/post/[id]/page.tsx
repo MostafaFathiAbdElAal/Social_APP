@@ -3,19 +3,17 @@ import PostCard from "@/components/PostCard/PostCard";
 import { env } from "@/env";
 import { SinglePostResponse } from "@/types/posts.type";
 import { Metadata } from "next";
-import { cache } from "react";
 interface PageProps {
     params: Promise<{ id: string }>
 }
 
 export const revalidate = 43200;
 
-const getDetailPost = cache(getPost);
+const getDetailPost = getPost;
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const { id } = await params
-    const postId = decodeURIComponent(id);
-    const res: SinglePostResponse = await getDetailPost(postId);
+    const res: SinglePostResponse = await getDetailPost(id);
 
     return {
         metadataBase: new URL(env.NEXT_PUBLIC_BASEURL),
@@ -34,8 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function Page({ params }: PageProps) {
     const { id } = await params
-    const postId = decodeURIComponent(id);
-    const res: SinglePostResponse = await getDetailPost(postId);
+    const res: SinglePostResponse = await getDetailPost(id);
 
     return (
         <section className="mt-10">
