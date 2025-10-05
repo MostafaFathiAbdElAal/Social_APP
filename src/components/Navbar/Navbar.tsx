@@ -8,7 +8,6 @@ import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import MenuItem from '@mui/material/MenuItem';
 import { MouseEvent, useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import logout from '@/actions/logout.action';
@@ -16,7 +15,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useAppDispatch, useAppSelector } from '@/hooks/Redux.hook';
 import { getDataUser } from '@/store/features/user.slice';
-const pages = ['Products', 'Pricing', 'Blog'];
 
 export default function Navbar() {
     const router = useRouter()
@@ -100,11 +98,7 @@ export default function Navbar() {
                             onClose={handleCloseNavMenu}
                             sx={{ display: { xs: 'block', md: 'none' } }}
                         >
-                            {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography sx={{ textAlign: 'center' }}>{page}</Typography>
-                                </MenuItem>
-                            ))}
+                            
                         </Menu>
                     </Box>
 
