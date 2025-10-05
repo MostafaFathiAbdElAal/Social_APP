@@ -36,7 +36,7 @@ interface CommentState {
     visibleCommentsCount: number;
 }
 
-type CommentAction = 
+type CommentAction =
     | { type: "HANDLE_OPEN_COMMENTS" }
     | { type: "HANDLE_CLOSE_COMMENTS" }
     | { type: "SET_FULL_COMMENTS", payload: { comments: Comment[] } }
@@ -78,9 +78,9 @@ const reducer = function (state: CommentState, action: CommentAction): CommentSt
 
 export default function PostCard({ post }: PostCardProps) {
     const [states, dispatch] = useReducer(reducer, post.comments, initialReducer)
-    
+
     const myAccount = useAppSelector((store) => store.userReducer.data.user)
-    
+
     const namesAccounts = useMemo(() => {
         const nameAccountComments = states.fullComments.map((comment) => {
             return comment.commentCreator.name
@@ -103,7 +103,7 @@ export default function PostCard({ post }: PostCardProps) {
                         type: "SET_FULL_COMMENTS",
                         payload: { comments: res.comments }
                     });
-                    
+
                     formik.resetForm({
                         values: { content: "" }
                     });
@@ -111,7 +111,7 @@ export default function PostCard({ post }: PostCardProps) {
             })
         }
     })
-    
+
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -138,7 +138,7 @@ export default function PostCard({ post }: PostCardProps) {
 
         const container = scrollContainerRef.current;
         const loader = loadMoreRef.current;
-        
+
         const loadMoreComments = () => {
             dispatch({
                 type: "SET_VISIBLE_COMMENTS_COUNT",
@@ -147,7 +147,7 @@ export default function PostCard({ post }: PostCardProps) {
                 }
             });
         };
-        
+
         if (!container || !loader) {
             const timer = setTimeout(() => {
                 const containerCheck = scrollContainerRef.current;
@@ -192,7 +192,7 @@ export default function PostCard({ post }: PostCardProps) {
             if (loader) observer.unobserve(loader);
         };
     }, [states.open, states.visibleCommentsCount, states.fullComments, hasMoreComments]);
-    
+
     return (
         <div className="max-w-xl min-w-xs w-full mx-auto bg-white shadow-2xl rounded-xl border border-gray-100 mb-8 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3">
@@ -382,9 +382,9 @@ export default function PostCard({ post }: PostCardProps) {
                                     value={formik.values.content}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
-                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10" 
+                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10"
                                 />
-                                <Tooltip title={formik.errors.content} arrow disableFocusListener={true} disableHoverListener={true} disableTouchListener={true}
+                                <Tooltip classes={{ tooltip: "z-5000" }} title={formik.errors.content} arrow disableFocusListener={true} disableHoverListener={true} disableTouchListener={true}
                                     open placement="top"
 
                                 >
