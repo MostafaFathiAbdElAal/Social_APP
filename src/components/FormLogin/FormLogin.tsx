@@ -81,7 +81,7 @@ export default function FormLogin() {
     })
 
     return <>
-        <form onSubmit={formik.handleSubmit} className={`bg-white rounded-xl shadow-md p-6 w-full max-w-md space-y-3 ${formik.isSubmitting ? "cursor-progress" : ""}`}>
+        <form onSubmit={formik.handleSubmit} className={`bg-white rounded-xl shadow-md p-4 sm:p-6 w-full max-w-md space-y-3 ${formik.isSubmitting ? "cursor-progress" : ""}`}>
             <div>
                 <TextField
                     type="email"

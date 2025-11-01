@@ -122,22 +122,19 @@ export default function FormSignup() {
     }, [formik.values.month, formik.values.year])
 
     return (
-        <div className="bg-white rounded-md mt-6 shadow-lg  max-w-md mx-auto ">
-            <header className="p-6">
-                <h2 className="text-2xl font-bold text-center mb-1">
+        <div className="bg-white rounded-md mt-6 shadow-lg max-w-md mx-auto ">
+            <header className="p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-center mb-1">
                     Create a new account
                 </h2>
                 <p className="text-center text-gray-600">Its quick and easy.</p>
-
             </header>
-
-            <form onSubmit={formik.handleSubmit} className="space-y-4 p-6 border-t-2 border-Lineborder border-dashed">
-                <div className="flex gap-2">
+            <form onSubmit={formik.handleSubmit} className="space-y-4 p-4 sm:p-6 border-t-2 border-Lineborder border-dashed">
+                <div className="flex max-sm:flex-col gap-2">
                     <div className="flex-1">
                         <TextField
                             type="text"
                             name="firstName"
-
                             label="First name"
                             value={formik.values.firstName}
                             onChange={formik.handleChange}

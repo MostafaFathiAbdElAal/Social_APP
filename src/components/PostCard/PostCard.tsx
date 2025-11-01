@@ -227,7 +227,7 @@ export default function PostCard({ post }: PostCardProps) {
                 </IconButton>
             </div>
 
-            <div className="px-5 pb-3 text-base text-gray-800 leading-relaxed whitespace-pre-line">
+            <div className="px-5 mb-1 text-base text-gray-800 leading-relaxed whitespace-pre-line">
                 {post?.body?.length > 300 ? `${post.body.substring(0, 300)}...` : post.body}
             </div>
 
@@ -254,7 +254,7 @@ export default function PostCard({ post }: PostCardProps) {
 
 
 
-            <div className="flex justify-end items-center px-5 pt-3 ">
+            <div className="flex justify-end items-center px-5 mt-1 ">
                 <Tooltip
                     classes={{ tooltip: "max-h-43 bg-black/60" }}
                     title={

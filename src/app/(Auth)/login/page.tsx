@@ -4,11 +4,11 @@ export default function Page() {
     return (
 
         <div className="min-h-screen flex items-center justify-center">
-            <div className="flex flex-col items-center  gap-10 max-w-5xl w-full px-4">
+            <div className="flex flex-col items-center gap-5 max-w-5xl w-full px-2">
 
                 <div>
 
-                    <h1 className="text-5xl font-bold font-sans socialApp">
+                    <h1 className="text-4xl sm:text-5xl font-bold font-sans socialApp">
                         Social app
                     </h1>
                     

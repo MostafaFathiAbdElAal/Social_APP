@@ -50,7 +50,7 @@ export default function Navbar() {
 
     }, [data.message, dispatch])
     return (
-        <AppBar position="sticky" color='warning' sx={{ paddingBlock: "5px" }}>
+        <AppBar position="sticky" color='warning' sx={{ paddingBlock: "5px",zIndex:"10" }}>
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
                     <Typography

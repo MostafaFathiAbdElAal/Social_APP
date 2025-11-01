@@ -1,37 +1,46 @@
-/*
-
-25/10/2025
-There are bug in this component bug : 
-resize window and overflow size long 
-problem caused by swiper 💔
-
-*/
 "use client";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { User } from "@/types/posts.type";
 import Image from "next/image";
 import Link from "next/link";
-import "swiper/swiper.css"
+import "swiper/css";
 import { Autoplay } from "swiper/modules";
+import { useEffect, useState } from "react";
+import SliderLoader from "../SliderLoader/SliderLoader";
+
 interface SliderUsersProps {
-    users: User[]
+    users: User[];
 }
 
 export default function SliderUsers({ users }: SliderUsersProps) {
+    // 🔹 حل مشكلة SSR hydration: نمنع التحميل قبل الـ client
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+    if (!mounted) return <SliderLoader/>;
     return (
         <Swiper
+            key={users.length}
             spaceBetween={5}
-            modules={[Autoplay]}
             loop={true}
+            observer={true}
+            observeParents={true}
+            modules={[Autoplay]}
             autoplay={{ delay: 2000, disableOnInteraction: false }}
-            slidesPerView={7}
+            
+            breakpoints={{
+                250: { slidesPerView: 3 },
+                400: { slidesPerView: 5 },
+                500: { slidesPerView: 6 },
+            }}
             className="py-2"
         >
             {users.map((user) => (
-                <SwiperSlide key={user._id} >
-                    <Link href={`/profile/${user._id}`} className="flex flex-col items-center justify-center">
+                <SwiperSlide key={user._id}>
+                    <Link
+                        href={`/profile/${user._id}`}
+                        className="flex flex-col items-center justify-center"
+                    >
                         <div className="w-17 h-17 overflow-hidden rounded-full p-1 border-2 border-pink-500 flex items-center justify-center">
-
                             <Image
                                 src={user.photo}
                                 alt={user.name}

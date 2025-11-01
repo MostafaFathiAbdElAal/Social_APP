@@ -11,7 +11,7 @@ export async function getPost(id: string) {
                 "Content-Type": "application/json",
                 token: token ?? ""
             },
-            next: { revalidate: 43200 },
+            cache:"no-store"
         };
 
         const req = await fetch(

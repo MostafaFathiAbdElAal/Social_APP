@@ -1,8 +1,7 @@
 'use client'
 import CloseIcon from "@mui/icons-material/Close";
 import * as Yup from "yup"
-import SendIcon from "@mui/icons-material/Send";
-import { Box, Button, InputBase, Tooltip } from "@mui/material";
+import { Box, InputBase } from "@mui/material";
 import { IconButton } from "@mui/material";
 import { useFormik } from "formik";
 import { createComment } from "@/actions/createComment.action";
@@ -52,22 +51,27 @@ export default function CommentList({ open, onClose, DisplayComments, scrollRef,
     })
     return <AnimatePresence>
         {
-            open && <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-            className="z-5000 fixed right-0 left-0 top-0 bottom-0 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={(e) => {
-                if (e.target === e.currentTarget) {
-                    onClose()
-                }
-            }}>
-                <motion.div 
-                initial={{ y:"20%", opacity: 0 }}
-                animate={{ y: "0%", opacity: 1 }}
-                exit={{ y: "20%", opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 25, duration: 0.3 }}
-                className="flex flex-col max-h-[90vh] overflow-hidden max-w-xl w-full rounded-sm bg-white">
+            open && <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.25 }}
+                className="z-5000 fixed right-0 left-0 top-0 bottom-0 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={(e) => {
+                    if (e.target === e.currentTarget) {
+                        onClose()
+                    }
+                }}>
+                <motion.div
+                    initial={{ y: 300, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 100, opacity: 0 }}
+                    transition={{
+                        type: "spring",
+                        stiffness: 250,
+                        damping: 22,
+                        duration: 0.35,
+                    }}
+                    className="flex flex-col max-h-[90vh] overflow-hidden max-w-xl w-full rounded-sm bg-white">
 
                     <div className="p-4 flex justify-between items-center border-b border-gray-200 sticky top-0 bg-white z-20">
                         <h2 className="text-xl font-bold text-gray-800">Comments ({countComments})</h2>
@@ -125,16 +129,12 @@ export default function CommentList({ open, onClose, DisplayComments, scrollRef,
                                     className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10"
                                     autoComplete="false"
                                 />
-                                <Tooltip classes={{ popper: "z-5000" }} title={formik.values.content.length !== 0 ? formik.errors.content : ""} arrow disableFocusListener={true} disableHoverListener={true} disableTouchListener={true}
-                                    open placement="top"
-
-                                >
-                                    <Button loading={formik.isSubmitting} type="submit" loadingPosition="center" color="primary"
-                                        className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150 min-h-8 min-w-8 rounded-full
+                                
+                                    <button type="submit" 
+                                        className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150 min-h-8 min-w-8 rounded-full text-[18px] 
                                     `}>
-                                        {!formik.isSubmitting ? <SendIcon fontSize="small" /> : ""}
-                                    </Button>
-                                </Tooltip>
+                                        {!formik.isSubmitting ? <i className={`${formik.errors.content ? "fa-regular" : "fa-solid"} fa-paper-plane`}></i> : ""}
+                                    </button>
                             </Box>
                         </form>
                     </div>
