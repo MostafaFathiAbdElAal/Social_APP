@@ -1,4 +1,4 @@
-import { getPosts } from "@/actions/getAllPosts.action";
+import { getPosts } from "@/actions/getPosts.action";
 import { env } from "@/env";
 import { ApiResponse } from "@/types/posts.type";
 import { MetadataRoute } from "next";

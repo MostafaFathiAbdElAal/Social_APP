@@ -1,7 +1,7 @@
 "use server"
 import { env } from "@/env";
 import { cookies } from "next/headers";
-interface Values  {
+interface Values {
     email: string;
     password: string;
 };
@@ -22,19 +22,19 @@ export async function login(data: Values) {
         );
         const res = await req.json();
         if (res.message === "success") {
-                (await cookies()).set("token", res.token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: "strict",
-                    maxAge: 60 * 60 * 24,
-                    path: "/",
-                    
-                })
+            (await cookies()).set("token", res.token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "strict",
+                maxAge: 60 * 60 * 24,
+                path: "/",
+
+            })
         }
 
-console.log(res);
+        console.log(res);
 
- if (req.ok) {
+        if (req.ok) {
             return res.message
         } else {
             return res

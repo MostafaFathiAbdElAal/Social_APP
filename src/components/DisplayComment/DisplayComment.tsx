@@ -1,5 +1,4 @@
 "use client"
-
 import { Comment, Comment as pageProps, Post } from "@/types/posts.type"
 import InitialAvatar from "../InitialAvatar/InitialAvatar"
 import { formatTimeAgo } from "@/utils/FormatTimeAgo"
@@ -159,7 +158,7 @@ export default function DisplayComment({ comment, changeComments, currentPost }:
                     {formatTimeAgo(comment.createdAt)}
                 </span>
 
-                {comment.commentCreator._id === (myAccount.user._id || localStorage.getItem("User")) && (
+                {comment.commentCreator._id === myAccount.user._id && (
                     <>
                         {status.isEditing ? (
                             <Button

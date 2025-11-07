@@ -1,4 +1,4 @@
-import { getPosts } from "@/actions/getAllPosts.action";
+import { getPosts } from "@/actions/getPosts.action";
 import PostCard from "@/components/PostCard/PostCard";
 import SliderUsers from "@/components/SliderUsers/SliderUsers";
 import { ApiResponse } from "@/types/posts.type";
@@ -15,7 +15,7 @@ export default async function Home() {
     <section className="mb-3">
       <SliderUsers users={resUsers} />
     </section>
-    <section className="flex flex-col items-center gap-5">
+    <section className="flex flex-col select-none items-center gap-5">
       {
         res.posts.map((post, index) => <PostCard key={index} post={post} />)
       }

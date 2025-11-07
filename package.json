@@ -1,6 +1,6 @@
 {
   "name": "social_app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -13,7 +13,6 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.2",
-    "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^7.3.2",
     "@mui/material-nextjs": "^7.3.2",
     "@reduxjs/toolkit": "^2.9.0",

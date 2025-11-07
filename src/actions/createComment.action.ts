@@ -2,7 +2,6 @@
 import { env } from "@/env";
 import { Comments } from "@/types/posts.type";
 import { cookies } from "next/headers";
-import { rebuildPostPage } from "./rebuildPages";
 interface Values {
     content: string,
     post: string
@@ -44,7 +43,6 @@ export async function createComment(values: Values) {
                 }
 
             })
-            rebuildPostPage(values.post)
             return {
                 message: res.message,
                 comments

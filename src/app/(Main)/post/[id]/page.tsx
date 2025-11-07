@@ -31,9 +31,8 @@ export default async function Page({ params }: PageProps) {
     const { id } = await params
     const postId = decodeURIComponent(id);
     const res: SinglePostResponse = await getDetailPost(postId);
-
     return (
-        <section className="mt-10">
+        <section className="select-none">
             <PostCard post={res.post} />
         </section>
     );

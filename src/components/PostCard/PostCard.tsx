@@ -2,7 +2,6 @@
 import { useMemo, useRef, useEffect, useReducer, useCallback } from "react";
 import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShareIcon from "@mui/icons-material/Share";
 import { Tooltip } from "@mui/material";
 import { Controlled as ControlledZoom } from 'react-medium-image-zoom'
@@ -27,7 +26,7 @@ interface CommentState {
     fullComments: Comment[];
     visibleCommentsCount: number;
     visibleShare: boolean;
-    isZoom: boolean;
+    isZoomPost: boolean;
 }
 
 export type CommentAction =
@@ -37,14 +36,14 @@ export type CommentAction =
     | { type: "HANDLE_OPEN_Share" }
     | { type: "SET_FULL_COMMENTS", payload: { comments: Comment[] } }
     | { type: "SET_VISIBLE_COMMENTS_COUNT", payload: { count: number } }
-    | { type: "HANDLE_ZOOM_IMAGE", payload: { zoom: boolean } };
+    | { type: "HANDLE_ZOOM_IMAGE_POST", payload: { zoom: boolean } };
 
 const initialReducer: (initialComments: Comment[]) => CommentState = (initialComments) => ({
     open: false,
     fullComments: initialComments,
     visibleCommentsCount: COMMENTS_INCREMENT,
     visibleShare: false,
-    isZoom: false,
+    isZoomPost: false,
 });
 
 const reducer = function (state: CommentState, action: CommentAction): CommentState {
@@ -80,10 +79,10 @@ const reducer = function (state: CommentState, action: CommentAction): CommentSt
                 ...state,
                 visibleShare: false,
             }
-        case "HANDLE_ZOOM_IMAGE":
+        case "HANDLE_ZOOM_IMAGE_POST":
             return {
                 ...state,
-                isZoom: action.payload.zoom,
+                isZoomPost: action.payload.zoom,
             }
         default:
             return state
@@ -205,16 +204,19 @@ export default function PostCard({ post }: PostCardProps) {
         <div className="w-full mx-auto bg-white shadow-xl rounded-xl border border-gray-100 mb-8 overflow-hidden">
             <div className="flex items-center justify-between px-5 py-3">
                 <div className="flex items-center gap-3">
-                    <div className="rounded-full overflow-hidden w-11 h-11 ring-2 ring-indigo-500 ring-offset-2">
-                        <Image
-                            src={post.user.photo}
-                            alt={post.user.name}
-                            height={44}
-                            width={44}
-                            className="object-cover"
-                            loading="lazy"
-                        />
-                    </div>
+
+                    <Link href={`/profile/${post.user._id}`} className="text-sm font-semibold text-gray-900 hover:underline cursor-pointer transition-colors duration-150">
+                        <div className="rounded-full overflow-hidden w-11 h-11 ring-2 ring-indigo-500 ring-offset-2">
+                            <Image
+                                src={post.user.photo}
+                                alt={post.user.name}
+                                height={44}
+                                width={44}
+                                className="object-cover"
+                                loading="lazy"
+                            />
+                        </div>
+                    </Link>
                     <div className="flex flex-col">
                         <Link href={`/profile/${post.user._id}`} className="text-sm font-semibold text-gray-900 hover:underline cursor-pointer transition-colors duration-150">
                             {post.user.name}
@@ -234,9 +236,9 @@ export default function PostCard({ post }: PostCardProps) {
             {post.image && (
                 <div className="w-full p-2 overflow-hidden">
                     <ControlledZoom
-                        isZoomed={states.isZoom}
+                        isZoomed={states.isZoomPost}
                         onZoomChange={(zoomed) =>
-                            dispatch({ type: "HANDLE_ZOOM_IMAGE", payload: { zoom: zoomed } })
+                            dispatch({ type: "HANDLE_ZOOM_IMAGE_POST", payload: { zoom: zoomed } })
                         }
                         canSwipeToUnzoom={true}
                     >
@@ -286,10 +288,6 @@ export default function PostCard({ post }: PostCardProps) {
             </div>
 
             <div className="border-t border-gray-100 px-3 py-1 mt-2 flex items-center justify-around gap-2">
-                <button className="flex items-center justify-center flex-1 py-2 rounded-lg text-gray-600 hover:bg-red-50 hover:text-red-500 transition-colors duration-200">
-                    <FavoriteBorderIcon fontSize="small" className="mr-2" />
-                    <span className="text-sm font-semibold">Like</span>
-                </button>
                 <button
                     onClick={handleOpenComments}
                     className="flex items-center justify-center flex-1 py-2 rounded-lg text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors duration-200"
@@ -297,6 +295,7 @@ export default function PostCard({ post }: PostCardProps) {
                     <i className="mr-2 fa-regular fa-comment" />
                     <span className="text-sm font-semibold">Comment</span>
                 </button>
+                <div className="animate-pulse bg-gray-300 h-3 rounded-full"></div>
                 <button onClick={() => {
                     dispatch({ type: "HANDLE_OPEN_Share" })
                 }} className="flex items-center justify-center flex-1 py-2 rounded-lg text-gray-600 hover:bg-green-50 hover:text-green-600 transition-colors duration-200">

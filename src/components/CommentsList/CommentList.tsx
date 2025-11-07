@@ -62,9 +62,9 @@ export default function CommentList({ open, onClose, DisplayComments, scrollRef,
                     }
                 }}>
                 <motion.div
-                    initial={{ y: 300, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{  opacity: 0 }}
                     transition={{
                         type: "spring",
                         stiffness: 250,
@@ -85,7 +85,7 @@ export default function CommentList({ open, onClose, DisplayComments, scrollRef,
                         className="flex-grow overflow-y-auto px-5 pt-5 comments-scroll-container"
                         style={{ minHeight: '100px' }}
                     >
-                        {DisplayComments.length > 0 ? (
+                        {myAccount._id ? DisplayComments.length > 0 ? (
                             DisplayComments.map((comment, index) => {
                                 const isLast = index === DisplayComments.length - 1;
                                 return <div key={comment._id} ref={isLast && moreComments ? loadMore : null}
@@ -98,46 +98,79 @@ export default function CommentList({ open, onClose, DisplayComments, scrollRef,
                             <p className="text-center text-gray-500 py-6 text-base italic">
                                 Share your ideas 🚀
                             </p>
-                        )}
+                        ) : <div className="h-82 flex flex-col gap-10">
+                            <div className="flex gap-3">
+                                <div className="animate-pulse bg-gray-300 w-10 h-10 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="animate-pulse bg-gray-300 w-1/4 h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-full h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-2/3 h-3 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="animate-pulse bg-gray-300 w-10 h-10 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="animate-pulse bg-gray-300 w-1/4 h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-full h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-2/3 h-3 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <div className="animate-pulse bg-gray-300 w-10 h-10 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="animate-pulse bg-gray-300 w-1/4 h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-full h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-2/3 h-3 rounded-full"></div>
+                                </div>
+                            </div>
 
-                        {moreComments && (
-                            <div className="flex justify-center my-4 text-indigo-600 font-medium">
-                                ... Loading more comments
+                        </div>}
+
+                        {moreComments && myAccount._id && (
+                            <div className="flex gap-3 mb-2">
+                                <div className="animate-pulse bg-gray-300 w-10 h-10 rounded-full"></div>
+                                <div className="flex-1 space-y-2">
+                                    <div className="animate-pulse bg-gray-300 w-1/4 h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-full h-3 rounded-full"></div>
+                                    <div className="animate-pulse bg-gray-300 w-2/3 h-3 rounded-full"></div>
+                                </div>
                             </div>
                         )}
                     </div>
+                    {
+                        myAccount._id ? <div
+                            className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-20" // padding أقل قليلاً
+                        >
+                            <form onSubmit={formik.handleSubmit} className="flex items-start gap-2">
+                                <div className="flex flex-col items-center rounded-full overflow-hidden">
+                                    <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
+                                </div>
 
-                    <div
-                        className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 z-20" // padding أقل قليلاً
-                    >
-                        <form onSubmit={formik.handleSubmit} className="flex items-start gap-2">
-                            <div className="flex flex-col items-center rounded-full overflow-hidden">
-                                <Image alt="user image" src={myAccount.photo} width={20} height={20} className="w-full h-full object-contain" />
-                            </div>
+                                <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative">
 
-                            <Box className="flex-grow flex flex-col bg-gray-100 rounded-lg p-2 shadow-sm relative">
+                                    <InputBase
+                                        placeholder={`Comment as ${myAccount.name}`}
+                                        fullWidth
+                                        multiline
+                                        maxRows={4}
+                                        name="content"
+                                        value={formik.values.content}
+                                        onChange={formik.handleChange}
+                                        onBlur={formik.handleBlur}
+                                        className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10"
+                                        autoComplete="false"
+                                    />
 
-                                <InputBase
-                                    placeholder={`Comment as ${myAccount.name}`}
-                                    fullWidth
-                                    multiline
-                                    maxRows={4}
-                                    name="content"
-                                    value={formik.values.content}
-                                    onChange={formik.handleChange}
-                                    onBlur={formik.handleBlur}
-                                    className="text-sm text-gray-800 pr-10 h-10 overflow-hidden max-h-10"
-                                    autoComplete="false"
-                                />
-                                
-                                    <button type="submit" 
+                                    <button type="submit"
                                         className={`absolute right-2 top-3 text-indigo-600 hover:text-indigo-700 transition-colors duration-150 min-h-8 min-w-8 rounded-full text-[18px] 
                                     `}>
-                                        {!formik.isSubmitting ? <i className={`${formik.errors.content ? "fa-regular" : "fa-solid"} fa-paper-plane`}></i> : ""}
+                                        {!formik.isSubmitting ? <i className={`${formik.errors.content ? "fa-regular" : formik.values.content !== "" ? "fa-solid" : "fa-regular"} fa-paper-plane`}></i> : ""}
                                     </button>
-                            </Box>
-                        </form>
-                    </div>
+                                </Box>
+                            </form>
+                        </div> : ""
+
+                    }
 
                 </motion.div>
             </motion.div>

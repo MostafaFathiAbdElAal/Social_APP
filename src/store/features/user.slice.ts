@@ -18,7 +18,7 @@ const initialState: userState = {
             dateOfBirth: "",
             email: "",
             gender: "",
-            name: "User",
+            name: "",
             photo: "https://linked-posts.routemisr.com/uploads/default-profile.png"
         }
     }
